@@ -31,6 +31,7 @@ from keras_layers.keras_layer_DecodeDetectionsFast import DecodeDetectionsFast
 def ssd_300(image_size,
             n_classes,
             mode='training',
+            input_tensor=None,
             l2_regularization=0.0005,
             min_scale=None,
             max_scale=None,
@@ -260,7 +261,10 @@ def ssd_300(image_size,
     # Build the network.
     ############################################################################
 
-    x = Input(shape=(img_height, img_width, img_channels))
+    if input_tensor == None:
+        x = Input(shape=(img_height, img_width, img_channels))
+    else:
+        x = input_tensor
 
     # The following identity layer is only needed so that the subsequent lambda layers can be optional.
     x1 = Lambda(identity_layer, output_shape=(img_height, img_width, img_channels), name='identity_layer')(x)

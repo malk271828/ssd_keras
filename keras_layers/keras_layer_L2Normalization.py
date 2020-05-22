@@ -22,6 +22,8 @@ import keras.backend as K
 from keras.engine.topology import InputSpec
 from keras.engine.topology import Layer
 
+from keras_layers.keras_layer_common import isChannelsLast
+
 class L2Normalization(Layer):
     '''
     Performs L2 normalization on the input tensor with a learnable scaling parameter
@@ -44,7 +46,7 @@ class L2Normalization(Layer):
     '''
 
     def __init__(self, gamma_init=20, **kwargs):
-        if K.image_dim_ordering() == 'tf':
+        if isChannelsLast():
             self.axis = 3
         else:
             self.axis = 1
