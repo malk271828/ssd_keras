@@ -74,7 +74,7 @@ def greedy_nms(y_pred_decoded, iou_threshold=0.45, coords='corners', border_pixe
 
     return y_pred_decoded_nms
 
-def _greedy_nms(predictions, iou_threshold=0.45, coords='corners', border_pixels='half'):
+def _greedy_nms(predictions, iou_threshold=0.45, coords='corners', border_pixels='half', sort=True):
     '''
     The same greedy non-maximum suppression algorithm as above, but slightly modified for use as an internal
     function for per-class NMS in `decode_detections()`.
@@ -82,7 +82,10 @@ def _greedy_nms(predictions, iou_threshold=0.45, coords='corners', border_pixels
     boxes_left = np.copy(predictions)
     maxima = [] # This is where we store the boxes that make it through the non-maximum suppression
     while boxes_left.shape[0] > 0: # While there are still boxes left to compare...
-        maximum_index = np.argmax(boxes_left[:,0]) # ...get the index of the next box with the highest confidence...
+        if sort:
+            maximum_index = np.argmax(boxes_left[:,0]) # ...get the index of the next box with the highest confidence...
+        else:
+            maximum_index = 0
         maximum_box = np.copy(boxes_left[maximum_index]) # ...copy that box and...
         maxima.append(maximum_box) # ...append it to `maxima` because we'll definitely keep it
         boxes_left = np.delete(boxes_left, maximum_index, axis=0) # Now remove the maximum box from `boxes_left`
@@ -208,7 +211,7 @@ def decode_detections(y_pred,
             single_class = batch_item[:,[class_id, -4, -3, -2, -1]] # ...keep only the confidences for that class, making this an array of shape `[n_boxes, 5]` and...
             threshold_met = single_class[single_class[:,0] > confidence_thresh] # ...keep only those boxes with a confidence above the set threshold.
             if threshold_met.shape[0] > 0: # If any boxes made the threshold...
-                maxima = _greedy_nms(threshold_met, iou_threshold=iou_threshold, coords='corners', border_pixels=border_pixels) # ...perform NMS on them.
+                maxima = _greedy_nms(threshold_met, iou_threshold=iou_threshold, coords='corners', border_pixels=border_pixels, sort=(top_k!="all")) # ...perform NMS on them.
                 maxima_output = np.zeros((maxima.shape[0], maxima.shape[1] + 1)) # Expand the last dimension by one element to have room for the class ID. This is now an arrray of shape `[n_boxes, 6]`
                 maxima_output[:,0] = class_id # Write the class ID to the first column...
                 maxima_output[:,1:] = maxima # ...and write the maxima to the other columns...
