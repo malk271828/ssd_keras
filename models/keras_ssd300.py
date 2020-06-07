@@ -397,8 +397,6 @@ def ssd_300(image_size,
                                                        conv7_2_mbox_conf_reshape,
                                                        conv8_2_mbox_conf_reshape,
                                                        conv9_2_mbox_conf_reshape])
-    if input_tensor != None:
-        return mbox_conf
 
     # Output shape of `mbox_loc`: (batch, n_boxes_total, 4)
     mbox_loc = Concatenate(axis=1, name='mbox_loc')([conv4_3_norm_mbox_loc_reshape,
@@ -460,4 +458,4 @@ def ssd_300(image_size,
                                      conv9_2_mbox_conf._keras_shape[1:3]])
         return model, predictor_sizes
     else:
-        return model
+        return model, mbox_conf
